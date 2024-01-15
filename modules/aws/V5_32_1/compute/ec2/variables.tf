@@ -10,12 +10,6 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "aws_profile" {
-  description = "AWS profile to use for the provider"
-  type        = string
-  default     = "default"
-}
-
 variable "instance_name" {
   description = "Name of the EC2 instance"
   type        = string
