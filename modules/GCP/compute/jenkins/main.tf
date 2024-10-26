@@ -21,14 +21,18 @@ resource "google_compute_instance" "jenkins_instance" {
   # Metadata for startup script to install Jenkins
   metadata_startup_script = <<-EOT
     #!/bin/bash
-    apt-get update
-    apt-get install -y openjdk-11-jdk
-    wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
-    sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
-    apt-get update
-    apt-get install -y jenkins
+    set -e
+    export DEBIAN_FRONTEND=noninteractive
+    apt update -qqy
+    apt install -qqy fontconfig openjdk-17-jre
+    wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+    apt update -qqy
+    apt install -qqy jenkins
     systemctl enable jenkins
     systemctl start jenkins
+    echo "Jenkins installed. Access at http://$(curl -s http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip -H "Metadata-Flavor: Google"):8080"
+    echo "Initial admin password: cat /var/lib/jenkins/secrets/initialAdminPassword"
   EOT
 }
 
