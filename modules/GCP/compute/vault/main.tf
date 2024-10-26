@@ -20,63 +20,75 @@ resource "google_compute_instance" "vault_server" {
 
   metadata_startup_script = <<-EOF
     #!/bin/bash
-    # Update and install dependencies
-    apt-get update
-    apt-get install -y unzip jq
 
-    # Download Vault
-    curl -sL https://releases.hashicorp.com/vault/${var.vault_version}/vault_${var.vault_version}_linux_amd64.zip -o vault.zip
+    DEBIAN_FRONTEND=noninteractive
+    # Update and install prerequisites
+    apt-get update -qqy
+    apt-get install -qqy curl jq net-tools
 
-    # Install Vault
-    unzip vault.zip
-    mv vault /usr/local/bin/
-    chmod +x /usr/local/bin/vault
+    # Download and install Vault
+    wget -qO- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
+    apt-get -qqy update && DEBIAN_FRONTEND=noninteractive apt-get install -qqy vault
 
-    # Create Vault user and directories
-    useradd --system --home /etc/vault.d --shell /bin/false vault
-    mkdir --parents /etc/vault.d
-    chown --recursive vault:vault /etc/vault.d
 
-    # Create Vault configuration file
-    cat <<EOF2 > /etc/vault.d/vault.hcl
-    storage "gcs" {
-      bucket = "${var.gcs_bucket_name}"
-    }
+    # Verify Vault installation
+    vault --version
 
+    # Create Vault configuration directory
+    mkdir -p /etc/vault
+    chown -R $(whoami):$(whoami) /etc/vault
+
+    # Create a basic Vault configuration file
+    cat <<VAULTCONFIG > /etc/vault/config.hcl
     listener "tcp" {
       address     = "0.0.0.0:8200"
-      tls_disable = 1
+      tls_disable = true
+    }
+
+    storage "file" {
+      path = "/etc/vault/data"
     }
 
     ui = true
-    EOF2
+    VAULTCONFIG
 
-    chown vault:vault /etc/vault.d/vault.hcl
+    # Create Vault data directory
+    mkdir -p /etc/vault/data
+    chown -R $(whoami):$(whoami) /etc/vault/data
 
-    # Create systemd service file
-    cat <<EOF2 > /etc/systemd/system/vault.service
+    # Set up Vault as a systemd service
+    cat <<SERVICEFILE > /etc/systemd/system/vault.service
     [Unit]
-    Description=Vault service
-    Requires=network-online.target
+    Description=Vault Secret Management Service
+    Documentation=https://www.vaultproject.io/docs/
     After=network-online.target
+    Wants=network-online.target
 
     [Service]
-    User=vault
-    Group=vault
-    ExecStart=/usr/local/bin/vault server -config=/etc/vault.d/vault.hcl
-    ExecReload=/bin/kill -HUP \$MAINPID
-    KillSignal=SIGINT
-    Restart=on-failure
+    ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.hcl
+    ExecReload=/bin/kill --signal HUP $MAINPID
+    KillMode=process
     LimitNOFILE=65536
+    Restart=on-failure
+    User=$(whoami)
+    Group=$(whoami)
 
     [Install]
     WantedBy=multi-user.target
-    EOF2
+    SERVICEFILE
 
-    # Enable and start Vault
+    # Reload systemd and start Vault service
     systemctl daemon-reload
     systemctl enable vault
     systemctl start vault
+
+    # Export VAULT_ADDR environment variable for CLI access
+    echo 'export VAULT_ADDR="http://127.0.0.1:8200"' >> /etc/profile
+    export VAULT_ADDR="http://127.0.0.1:8200"
+
+    # Display Vault status
+    vault status || echo "Vault installation and startup complete."
   EOF
 
   service_account {
@@ -143,7 +155,7 @@ resource "google_compute_firewall" "vault_lb_health_checks" {
   }
 
   source_ranges = [
-    "35.191.0.0/16",   # Google Cloud health check ranges
+    "35.191.0.0/16", # Google Cloud health check ranges
     "130.211.0.0/22"
   ]
 
