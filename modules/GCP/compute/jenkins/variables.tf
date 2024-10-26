@@ -22,6 +22,12 @@ variable "instance_type" {
   default     = "e2-medium"
 }
 
+variable "allow_stopping_for_update" {
+  description = "Allow stopping the instance for updates."
+  type        = bool
+  default     = true
+}
+
 variable "disk_size" {
   description = "Disk size in GB for Jenkins instance"
   type        = number

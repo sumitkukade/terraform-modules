@@ -1,8 +1,10 @@
 # Create a Google Compute Engine instance for Jenkins
 resource "google_compute_instance" "jenkins_instance" {
-  name         = var.instance_name
-  machine_type = var.instance_type
-  zone         = var.zone
+  name                      = var.instance_name
+  machine_type              = var.instance_type
+  zone                      = var.zone
+  allow_stopping_for_update = var.allow_stopping_for_update
+
 
   boot_disk {
     initialize_params {
