@@ -87,8 +87,9 @@ resource "google_compute_instance" "vault_server" {
   tags = ["vault-server"]
 }
 
+# Firewall rule to allow port 8200 from all sources
 resource "google_compute_firewall" "vault_firewall" {
-  name    = "vault-server-allow"
+  name    = "vault-server-allow-8200"
   network = var.network
 
   allow {
@@ -97,6 +98,54 @@ resource "google_compute_firewall" "vault_firewall" {
   }
 
   source_ranges = ["0.0.0.0/0"] # Adjust for your security requirements
+
+  target_tags = ["vault-server"]
+}
+
+# Firewall rule to allow HTTP (port 80) traffic from all sources
+resource "google_compute_firewall" "vault_http" {
+  name    = "vault-server-allow-http"
+  network = var.network
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+
+  source_ranges = ["0.0.0.0/0"] # Adjust for your security requirements
+
+  target_tags = ["vault-server"]
+}
+
+# Firewall rule to allow HTTPS (port 443) traffic from all sources
+resource "google_compute_firewall" "vault_https" {
+  name    = "vault-server-allow-https"
+  network = var.network
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"] # Adjust for your security requirements
+
+  target_tags = ["vault-server"]
+}
+
+# Firewall rule to allow Load Balancer health checks
+resource "google_compute_firewall" "vault_lb_health_checks" {
+  name    = "vault-server-allow-lb-health-checks"
+  network = var.network
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443", "8200"] # Adjust ports as per your health check configuration
+  }
+
+  source_ranges = [
+    "35.191.0.0/16",   # Google Cloud health check ranges
+    "130.211.0.0/22"
+  ]
 
   target_tags = ["vault-server"]
 }
