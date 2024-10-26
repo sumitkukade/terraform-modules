@@ -1,3 +1,9 @@
+# Provider configuration (if using a GCP provider centrally, this can be skipped here)
+provider "google" {
+  project = var.project_id
+  region  = var.region
+}
+
 # Create a Google Compute Engine instance for Jenkins
 resource "google_compute_instance" "jenkins_instance" {
   name         = var.instance_name
@@ -6,8 +12,8 @@ resource "google_compute_instance" "jenkins_instance" {
 
   boot_disk {
     initialize_params {
-      source_image = "ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20241004"
-      size         = var.disk_size
+      image = "ubuntu-os-cloud/ubuntu-2004-lts" # or another desired image
+      size  = var.disk_size
     }
   }
 
@@ -22,11 +28,11 @@ resource "google_compute_instance" "jenkins_instance" {
   metadata_startup_script = <<-EOT
     #!/bin/bash
     apt-get update
-    apt-get install -qqy openjdk-11-jdk
+    apt-get install -y openjdk-11-jdk
     wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
     sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
-    apt-get -qqy update
-    apt-get install -qqy jenkins
+    apt-get update
+    apt-get install -y jenkins
     systemctl enable jenkins
     systemctl start jenkins
   EOT
