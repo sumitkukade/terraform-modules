@@ -6,8 +6,8 @@ resource "google_compute_instance" "jenkins_instance" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2404-lts" # or another desired image
-      size  = var.disk_size
+      source_image = "ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20241004"
+      size         = var.disk_size
     }
   }
 
