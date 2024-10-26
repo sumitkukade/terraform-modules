@@ -1,9 +1,3 @@
-# Provider configuration (if using a GCP provider centrally, this can be skipped here)
-provider "google" {
-  project = var.project_id
-  region  = var.region
-}
-
 # Create a Google Compute Engine instance for Jenkins
 resource "google_compute_instance" "jenkins_instance" {
   name         = var.instance_name
