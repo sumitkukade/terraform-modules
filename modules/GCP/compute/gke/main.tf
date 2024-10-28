@@ -1,7 +1,7 @@
 resource "google_container_cluster" "primary" {
-  name               = "${var.cluster_name}-${var.environment}"
-  location           = var.region
-  initial_node_count = 1
+  name                     = "${var.cluster_name}-${var.environment}"
+  location                 = var.region
+  initial_node_count       = 1
   remove_default_node_pool = true
 
   # Enable private nodes for security
@@ -18,22 +18,16 @@ resource "google_container_cluster" "primary" {
   logging_service    = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
 
-  # Add optional subnetwork (if defined)
-  network            = var.network
-  subnetwork         = var.subnetwork
-
   # IP Allocation (VPC-native Cluster)
-  ip_allocation_policy {
-    use_ip_aliases = true
-  }
+  ip_allocation_policy {}
 }
+
 
 resource "google_container_node_pool" "primary_nodes" {
   name       = "${var.cluster_name}-node-pool"
   location   = var.region
   cluster    = google_container_cluster.primary.name
   node_count = var.initial_node_count
-
   autoscaling {
     min_node_count = var.min_node_count
     max_node_count = var.max_node_count
@@ -59,12 +53,5 @@ resource "google_container_node_pool" "primary_nodes" {
 
     labels = var.node_labels
     tags   = var.node_tags
-  }
-
-  dynamic "node_locations" {
-    for_each = var.node_locations
-    content {
-      node_locations = node_locations.value
-    }
   }
 }
