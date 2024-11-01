@@ -39,3 +39,21 @@ variable "network" {
   type        = string
   default     = "default"
 }
+
+variable "preemptible" {
+  description = "Whether the instance is preemptible (Spot instance)"
+  type        = bool
+  default     = true
+}
+
+variable "maintenance_policy" {
+  description = "Maintenance policy for the instance"
+  type        = string
+  default     = "TERMINATE"
+}
+
+variable "automatic_restart" {
+  description = "Whether the instance should automatically restart if terminated"
+  type        = bool
+  default     = false
+}

@@ -5,6 +5,7 @@ resource "google_sql_database_instance" "postgres" {
 
   settings {
     tier = var.tier
+    edition = var.edition
 
     ip_configuration {
       ipv4_enabled = var.ipv4_enabled

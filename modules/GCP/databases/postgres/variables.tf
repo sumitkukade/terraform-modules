@@ -1,6 +1,13 @@
 variable "instance_name" {
   description = "The name of the Cloud SQL instance."
   type        = string
+  default     = "mydb_instance"
+}
+
+variable "edition" {
+  description = "The edition of the Cloud SQL instance. Options are STANDARD, BUSINESS, and ENTERPRISE_PLUS."
+  type        = string
+  default     = "ENTERPRISE"
 }
 
 variable "database_version" {
@@ -12,11 +19,13 @@ variable "database_version" {
 variable "region" {
   description = "The GCP region for the Cloud SQL instance."
   type        = string
+  default     = "asia-south1"
 }
 
 variable "tier" {
   description = "The machine tier (e.g., db-f1-micro)."
   type        = string
+  default     = "db-custom-1-3840"
 }
 
 variable "authorized_networks" {
@@ -31,6 +40,7 @@ variable "authorized_networks" {
 variable "db_username" {
   description = "The username for the PostgreSQL database."
   type        = string
+  default     = "myuser"
 }
 
 variable "db_password" {
@@ -42,6 +52,7 @@ variable "db_password" {
 variable "db_name" {
   description = "The name of the PostgreSQL database."
   type        = string
+  default     = "mydb"
 }
 
 variable "deletion_protection" {

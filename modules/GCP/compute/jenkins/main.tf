@@ -13,11 +13,16 @@ resource "google_compute_instance" "jenkins_instance" {
     }
   }
 
+  scheduling {
+    preemptible         = var.preemptible
+    on_host_maintenance = var.maintenance_policy
+    automatic_restart   = var.automatic_restart
+  }
+
   network_interface {
     network = var.network
     access_config {}
   }
-
   tags = ["jenkins"]
 
   # Metadata for startup script to install Jenkins
