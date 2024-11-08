@@ -58,7 +58,9 @@ resource "google_cloud_run_service" "cloud_run_service" {
     }
   }
 
-  autogenerate_revision_name = true
+  ingress                     = var.ingress
+  autogenerate_revision_name  = var.autogenerate_revision_name
+  allow_unauthenticated       = var.allow_unauthenticated
 }
 
 output "cloud_run_url" {
