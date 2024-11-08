@@ -31,7 +31,7 @@ resource "google_cloud_run_service" "cloud_run_service" {
   template {
     metadata {
       annotations = {
-        "run.googleapis.com/timeout" = "300s"  # Set timeout to 5 minutes
+        "run.googleapis.com/timeout" = "300s" # Set timeout to 5 minutes
       }
     }
     spec {
@@ -58,9 +58,17 @@ resource "google_cloud_run_service" "cloud_run_service" {
     }
   }
 
-  ingress                     = var.ingress
-  autogenerate_revision_name  = var.autogenerate_revision_name
-  allow_unauthenticated       = var.allow_unauthenticated
+  autogenerate_revision_name = var.autogenerate_revision_name
+}
+
+# IAM Binding to allow unauthenticated access if needed
+resource "google_cloud_run_service_iam_member" "allow_unauthenticated" {
+  project    = var.project_id
+  location   = var.region
+  service    = google_cloud_run_service.cloud_run_service.name
+  role       = "roles/run.invoker"
+  member     = "allUsers" # Allows public access
+  depends_on = [google_cloud_run_service.cloud_run_service]
 }
 
 output "cloud_run_url" {

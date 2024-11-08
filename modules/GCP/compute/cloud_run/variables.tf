@@ -62,3 +62,15 @@ variable "allow_unauthenticated" {
   type        = bool
   default     = true
 }
+
+variable "liveness_probe_path" {
+  description = "Path for the liveness probe"
+  type        = string
+  default     = "/health"
+}
+
+variable "readiness_probe_path" {
+  description = "Path for the readiness probe"
+  type        = string
+  default     = "/health"
+}
