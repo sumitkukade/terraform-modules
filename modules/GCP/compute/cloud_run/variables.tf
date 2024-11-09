@@ -6,7 +6,7 @@ variable "project_id" {
 variable "region" {
   description = "The region for the Cloud Run service"
   type        = string
-  default     = "asia-south1"
+  default     = "asia-southeast1"
 }
 
 variable "service_name" {

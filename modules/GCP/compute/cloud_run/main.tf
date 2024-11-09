@@ -64,7 +64,7 @@ resource "google_cloud_run_service" "cloud_run_service" {
 # IAM Binding to allow unauthenticated access if needed
 resource "google_cloud_run_service_iam_member" "allow_unauthenticated" {
   project    = var.project_id
-  location   = var.region
+  location   = google_cloud_run_service.cloud_run_service.location
   service    = google_cloud_run_service.cloud_run_service.name
   role       = "roles/run.invoker"
   member     = "allUsers" # Allows public access
